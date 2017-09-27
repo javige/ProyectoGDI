@@ -28,9 +28,12 @@ import ldap.modlist as modlist
 def index(request):
 	openrg = Configuracion.objects.get(clave='openregister').valor
 	freeun = Configuracion.objects.get(clave='freeusername').valor
+	print "user: ", request.META.get("REMOTE_USER", None)
+	print "email: ", request.META.get("REMOTE_USER_EMAIL", None)
 	return render(request, 'pgdiapp/index.html', { 'openrg':openrg, 'freeun':freeun })
 
 # Listado de alumnos validados
+@login_required
 def alumnos(request):
 	try:
 		grupos = request.user.ldap_user.group_names
@@ -67,6 +70,7 @@ def alumnos(request):
 	return render(request, 'pgdiapp/alumnos.html', { 'alumnos': alumnos, 'grado':grado, 'l_grados':l_grados })
 
 # Listado de alumnos registrados (no validados)
+@login_required
 def pendientes(request):
 	try:
 		grupos = request.user.ldap_user.group_names
@@ -111,6 +115,7 @@ def pendientes(request):
 	return render(request, 'pgdiapp/pendientes.html', { 'alumnos': alumnos, 'grado':grado, 'l_grados':l_grados })
 
 # Entrada al perfil
+@login_required
 def perfil(request, grado, usuario):
 	alumno = ldap_search("ou="+grado+","+settings.LDAP_STUDENTS_BASE,ldap.SCOPE_ONELEVEL,None,"(uid="+usuario+")")
 	if len(alumno) != 1:
@@ -120,8 +125,9 @@ def perfil(request, grado, usuario):
 		alumno[0][0][1]['jpegPhoto'][0] = base64.b64encode(bytes(alumno[0][0][1]['jpegPhoto'][0]))
 	# Obtener mensajes de ayuda
 	if request.user.is_authenticated and not request.user.is_staff:
-		l_grado = Grado.objects.get(cod=grado)
-		portada = Portada.objects.filter(grado=l_grado,visible=True)
+		#l_grado = Perfil.objects.get(user=request.user).grado
+		l_grado = alumno[0][0][1]['departmentNumber'][0]
+		portada = None #Portada.objects.filter(grado=l_grado,visible=True)
 	else:
 		portada = None
 	# Obtener quotas y espacio ocupado en disco
@@ -143,22 +149,15 @@ def perfil(request, grado, usuario):
 	)
 
 # Edición de perfil
+@login_required
 def editar(request, grado, usuario):
 	alumno = ldap_search("ou="+grado+","+settings.LDAP_STUDENTS_BASE,ldap.SCOPE_ONELEVEL,None,"(uid="+usuario+")")
 	if len(alumno) != 1:
 		return redirect('/app')
-	try:
-		perfil = Perfil.objects.get(user__username=usuario)
-	except:
-		try:
-			u = User.objects.get(username=usuario)
-			g = Grado.objects.get(cod=grado)
-			perfil = Perfil(user=u,grado=g,validado=True).save()
-		except:
-			return HttpResponseRedirect("/app/perfil/"+grado+"/"+usuario)
 	if request.method == 'POST':
 		pform = UserProfileMiniForm(data = request.POST)
 		if pform.is_valid():
+			perfil = Perfil.objects.get(user__username=usuario)
 			perfil.telefono = request.POST['telefono']
 			perfil.email = request.POST['email']
 			perfil.cp = request.POST['cp']
@@ -177,6 +176,7 @@ def editar(request, grado, usuario):
 	return render(request, 'pgdiapp/edicion_perfil.html', { 'alumno': alumno, 'grado':grado, 'pform':pform })
 
 # Subir foto de perfil
+@login_required
 def subir_foto(request, grado, usuario):
 	if request.method == 'POST':
 		form = PhotoForm(request.POST, request.FILES)
@@ -191,6 +191,7 @@ def subir_foto(request, grado, usuario):
 	return render(request, 'pgdiapp/subir_foto.html', { 'alumno': usuario, 'grado':grado, 'form': form })
 
 # Respuestas del cuestionario
+@login_required
 def respuestas(request, grado, usuario):
 	try:
 		alumno = Perfil.objects.get(user__username=usuario)
@@ -221,7 +222,10 @@ def registro(request):
 			profile.dni = profile.dni.upper()
 			profile.passwd = myPass
 			profile.save()
-			return HttpResponseRedirect("/app/cuestionario/"+str(user.username))
+			if profile.grado.cod == 'ASIR':
+				return HttpResponseRedirect("/app/cuestionario/"+str(user.username))
+			else:
+				return render(request, 'pgdiapp/registro_completo.html', { 'alumno': profile })
 	else:
 		uform = UserCreationForm()
 		pform = UserProfileForm()
@@ -241,7 +245,7 @@ def regreso(request):
 			if "acerca de" in request.POST['dni'].lower():
 				return render(request, 'pgdiapp/ee.html')
 			else:
-				l_usuarios = ldap_search(settings.LDAP_EXSTUDENTS_BASE,ldap.SCOPE_ONELEVEL,None,"(dni="+request.POST['dni']+")")
+				l_usuarios = ldap_search(settings.LDAP_EXSTUDENTS_BASE,ldap.SCOPE_ONELEVEL,None,"(carLicense="+request.POST['dni']+")")
 				if len(l_usuarios) == 1:
 					usuario = l_usuarios[0][0][1]['uid'][0]
 					grado = request.POST['grado']
@@ -250,7 +254,10 @@ def regreso(request):
 					if not perfil.grado:
 						perfil.grado = objGrado
 						perfil.save()
-						return HttpResponseRedirect("/app/cuestionario/"+str(usuario))
+						if perfil.grado == 'ASIR':
+							return HttpResponseRedirect("/app/cuestionario/"+str(usuario))
+						else:
+							return render(request, 'pgdiapp/registro_completo.html', { 'alumno': perfil })
 					else:
 						return HttpResponseRedirect("/app/noencontrado")
 				else:
@@ -299,6 +306,7 @@ def login_view(request):
 		return render(request, 'pgdiapp/login.html')
 
 # Cambiar contraseña
+@login_required
 def chpasswd(request):
 	if request.method == 'POST':
 		form = PasswordChangeForm(request.user, request.POST)
@@ -326,14 +334,17 @@ def sync_pass(alumno,grado,old_pass,new_pass):
 	l.modify_s(dn,ldif)
 	l.unbind_s()
 
+@login_required
 def chpasswdr(request):
 	return render(request, 'pgdiapp/password_ok.html')
 
 # Logout
+@login_required
 def logout_view(request):
 	logout(request)
 	return redirect('/app/logout_redirect')
 
+@login_required
 def logoutr(request):
 	return render(request, 'pgdiapp/logout.html')
 
