@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+	<style>
+	label {
+		font-size: 14px;
+        	font-weight: bold;
+	}
+        .formHolder{
+               text-align: center;
+        }
+	</style>
 	<script lang='javascript'>
 		function default_mod() {
 			var grados = document.getElementById("id_grado").options
@@ -120,11 +129,12 @@
 			{% if user.is_authenticated or not openrg %}
 				<div class="alert alert-block alert-error"><h4><a href="{% url 'index' %}" class="text-error">No deberías estar aquí...</a></h4></div>
 			{% else %}
-			<div class="alert alert-info">
+			<!--div class="alert alert-info">
 				Parece que estas accediendo desde la ip <strong>{{ ip }}</strong>. 
-				{% if grado != 'desconocido' %}Seguramente seas alumno de <strong>{{ grado }}</strong>{% endif %}. 
-				Si eres un antiguo alumno haz click [ <a href="{% url 'regreso' %}"><strong>AQUÍ</strong></a> ]
-			</div><hr />
+				<div {% if grado != 'desconocido' %}Seguramente seas alumno de <strong>{{ grado }}</strong>{% endif %}. 
+				Si eres un antiguo alumno haz click [ <a href="{% url 'regreso' %}"><strong>AQUÍ</strong></a> ] </div>
+			</div-->
+			<hr />
 			<fieldset class="module aligned first" >
 				<form enctype="multipart/form-data" method="post">
 					{% csrf_token %}
@@ -136,17 +146,23 @@
 							</div>
 						<br />
 					{% endif %}
+					<div class="formHolder">
 					<table class="table-overview registro">
 						<tr>
 							{% if freeun %}
 							<td colspan="2" class="reg_input"><strong>❋ Puede elegir el nombre de usuario deseado.</strong></td>
 							<td><label for="id_username">Nombre de<br>usuario:</label></td><td class="reg_input">{{ uform.username }}</td>
 							{% else %}
-							<td colspan="2" class="reg_input"><strong>❋ No es posible elegir el nombre de usuario.</strong></td>
+							<!--td colspan="2" class="reg_input"><strong>❋ No es posible elegir el nombre de usuario.</strong></td-->
 							<input id="username" type="hidden" name="username" value="dummy">
-							<td><label for="id_username">Nombre de<br>usuario:</label></td><td class="reg_input"><input disabled="disabled" type="text"></td>
+							<!--td><label for="id_username">Nombre de<br>usuario:</label></td><td class="reg_input"><input disabled="disabled" type="text"></td-->
 							{% endif %}
 							<td><label for="id_dni">DNI:</label></td><td class="reg_input">{{ pform.dni }}</td>
+							<td><label for="id_grado">Grado:</label></td><td class="reg_input">{{ pform.grado }}</td>
+						</tr>
+						<tr>
+							<td><label for="id_contraseña1">Contraseña:</label></td><td class="reg_input">{{ uform.password1 }}</td>
+                                                        <td><label for="id_contraseña2">Confirmar:</label></td><td class="reg_input">{{ uform.password2 }}</td>
 						</tr>
 						<tr>
 							<td>{{ pform.nombre.label_tag }}</td><td class="reg_input">{{ pform.nombre }}</td>
@@ -154,15 +170,15 @@
 							<td><label for="id_apellido2">2º Apellido:</label></td><td class="reg_input">{{ pform.apellido2 }}</td>
 						</tr>
 						<tr>
-							<td><label for="id_grado">Grado:</label></td><td class="reg_input">{{ pform.grado }}</td>
+							<td><label for="id_fecha_nac">Fecha de<br>Nacimiento:</label></td><td class="reg_input"><input id="id_fecha_nac" placeholder="dd/mm/yyyy" name="fecha_nac" required="" type="date"></td>
 							<td><label for="id_email">e-Mail:</label></td><td class="reg_input">{{ pform.email }}</td>
 							<td><label for="id_telefono">Teléfono:</label></td><td class="reg_input">{{ pform.telefono }}</td>
 						</tr>
 						<tr>
-							<td><label for="id_fecha_nac">Fecha de<br>Nacimiento:</label></td><td class="reg_input"><input id="id_fecha_nac" placeholder="dd/mm/yyyy" name="fecha_nac" required="" type="date"></td>
-							<td><label for="id_contraseña1">Contraseña:</label></td><td class="reg_input">{{ uform.password1 }}</td>
-							<td><label for="id_contraseña2">Contraseña:</label></td><td class="reg_input">{{ uform.password2 }}</td>
+							<td><label for="id_estudios">Estudios:</label></td><td class="reg_input">{{ pform.estudios }}</td>
+							<td><label for="id_trabajo">Trabajo:</label></td><td class="reg_input">{{ pform.trabajo }}</td>
 						</tr>
+
 						<tr>
 							<td><label for="id_address">Dirección<br>completa:</label></td>
 							<td colspan="3" class="reg_input"><input id="address" type="text" maxlength="100" value="" placeholder="c/ Conil de la Frontera, 3, 11011 Cádiz, Spain" /></td>
@@ -183,8 +199,9 @@
 						</tr>
 					</table>
 					<br />
-					<button class="btn btn-high btn-info" type="submit">Confirmar</button>
-					<button class="btn btn-high" onclick="location.href='{% url 'index' %}'">Volver</button>
+					<button class="btn btn-high btn-info text-right" type="submit">Confirmar</button>
+ 					<!--button class="btn btn-high" onclick="location.href='{% url 'index' %}'">Volver</button-->
+					</div>
 				</form>
 			</fieldset>
 			{% endif %}
