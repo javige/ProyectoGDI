@@ -35,6 +35,8 @@ from django_auth_ldap.config import LDAPSearch, PosixGroupType
 AUTH_LDAP_SERVER_URI = "ldap://pgdi:389"
 AUTH_LDAP_BIND_DN = "cn=admin,dc=pgdi,dc=inf"
 AUTH_LDAP_BIND_PASSWORD = "toor"
+AUTH_LDAP_ROOT_BIND_DN =
+AUTH_LDAP_ROOT_BIND_PASSWORD =
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=usuarios,dc=pgdi,dc=inf",
     ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
