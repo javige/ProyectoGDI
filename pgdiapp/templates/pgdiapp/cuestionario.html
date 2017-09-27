@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+        <style>
+       	   label {
+	      font-size: 14px;	
+              font-weight: bold;
+           }
+	   .buttonHolder{ 
+	       text-align: center; 
+           }
+	</style>
 	<script lang='javascript'>
 		function muestra_preguntas(n) {
 			for (i=0;i<n;i++) {
@@ -15,9 +24,13 @@
 			{% if user.is_authenticated or not openrg %}
 				<div class="alert alert-block alert-error"><h4><a href="{% url 'index' %}" class="text-error">No deberías estar aquí...</a></h4></div>
 			{% else %}
-				<div class="alert alert-info">Hola <strong>{{ alumno.nombre }}</strong>, para finalizar tu registro responde a estas preguntas</div><hr />
-				<h3>Evaluación inicial:</h3>
-				<div class="cuetionario">
+				{% if preguntas %}
+		 			<div class="alert alert-info">Hola <strong>{{ alumno.nombre }}</strong>, para finalizar tu registro responde a estas preguntas</div><hr />
+					<h3>Evaluación inicial:</h3>
+				{% else %}
+					<h3>No tienes Evaluación inicial</h3>
+				{% endif %}
+				<div class="cuestionario">
 					<fieldset class="module aligned first ">
 						<form enctype="multipart/form-data" method="post">
 							{% csrf_token %}
@@ -40,12 +53,14 @@
 								{% for respuesta in respuestas %}
 								<tr>
 									<input id="id_form-{{ forloop.counter0 }}-alumno" type="hidden" name="form-{{ forloop.counter0 }}-alumno" value="{{ alumno.pk }}">
-									<th><label id="id_texto-{{ forloop.counter0 }}">...</label></th><td><input class="texto_respuesta" id="id_form-{{ forloop.counter0 }}-texto" maxlength="300" name="form-{{ forloop.counter0 }}-texto" type="text"></td>
+									<th><label id="id_texto-{{ forloop.counter0 }}">...</label></th><td><textarea class="texto_respuesta" id="id_form-{{ forloop.counter0 }}-texto" maxlength="1000" cols="50" rows="10"name="form-{{ forloop.counter0 }}-texto"></textarea></td>
 								</tr>
 								{% endfor %}
 							</table>
 							<br />
-							<button class="btn btn-high btn-info" type="submit">Confirmar</button>
+							<div class="buttonHolder">
+							  <button class="btn btn-high btn-info" type="submit">Confirmar</button>
+							</div>
 						</form>
 					</fieldset>
 				</div>
