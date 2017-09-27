@@ -7,7 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from .forms import *
 from .models import *
 
-import ldap, copy, crypt, string, random, unicodedata, base64, smtplib, subprocess
+
+import os, ldap, copy, crypt, string, random, unicodedata, base64, smtplib, subprocess
 import ldap.modlist as modlist
 
 from correos import *
@@ -48,16 +49,17 @@ def obtener_grados(grupos):
 		l_grados.append('DAM')
 	if 'SMR' in grupos:
 		l_grados.append('SMR')
-	return l_grados
+	#return l_grados
+	return ['ASIR','DAM','SMR']
 
 # Obtención del grado por taller
 def obtener_grado(ip, hora):
 	if int(hora) > 15:
-		es_nocturno = True
+		es_tarde = True
 	else:
-		es_nocturno = False
+		es_tarde = False
 	try:
-		grado = Clase.objects.get(taller__numero=ip[8:9], grado__nocturno=es_nocturno).grado.cod
+		grado = Clase.objects.get(taller__numero=ip[8:9], tarde=es_tarde).grado.cod
 	except:
 		grado = 'desconocido'
 	return grado
@@ -65,6 +67,7 @@ def obtener_grado(ip, hora):
 # Generación del nombre del usuario
 def generar_username(nom, ap1, ap2):
 	for character in string.digits+" @.+-_":
+		nom = nom.split()[0]
 		nom = nom.replace(character,'')
 		ap1 = ap1.replace(character,'')
 		ap2 = ap2.replace(character,'')
@@ -72,7 +75,7 @@ def generar_username(nom, ap1, ap2):
 
 # Generación del directorio de casa
 def generar_directorio(usuario,grado):
-	home_dir = str(settings.HOME_DIRECTORY + usuario)
+	home_dir = os.path.join(settings.HOME_DIRECTORY, grado.lower(), usuario)
 	return home_dir
 
 # Cálculo de un nuevo uid/gid number
@@ -140,8 +143,12 @@ def sincronizar(alumno,grado,telefono,email,cp,direccion,localidad,provincia,com
 
 # Búsqueda de datos en ldap
 def ldap_search(baseDN,searchScope,retrieveAttributes,searchFilter):
-	l = ldap.open(settings.LDAP_SERVER_NAME)
-	l.protocol_version = settings.LDAP_VERSION
+	#l = ldap.open(settings.LDAP_SERVER_NAME)
+	#l.protocol_version = settings.LDAP_VERSION
+	l = ldap.initialize(settings.AUTH_LDAP_SERVER_URI)
+	l.start_tls_s()
+        l.simple_bind(settings.AUTH_LDAP_BIND_DN,settings.AUTH_LDAP_BIND_PASSWORD)
+
 	ldap_result_id = l.search(baseDN, searchScope, searchFilter, retrieveAttributes)
 	result_set = []
 	while True:
