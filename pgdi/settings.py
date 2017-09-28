@@ -157,12 +157,12 @@ WSGI_APPLICATION = 'pgdi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pgdi',
-        'USER': 'pgdiuser',
-        'PASSWORD': 'pgdipass',
-        'HOST': 'pgdi',
-        'PORT': '5432',
+        'ENGINE': '',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
