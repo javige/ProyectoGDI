@@ -32,9 +32,9 @@ AUTHENTICATION_BACKENDS = (
 
 from django_auth_ldap.config import LDAPSearch, PosixGroupType
 
-AUTH_LDAP_SERVER_URI = "ldap://pgdi:389"
-AUTH_LDAP_BIND_DN = "cn=admin,dc=pgdi,dc=inf"
-AUTH_LDAP_BIND_PASSWORD = "toor"
+AUTH_LDAP_SERVER_URI = ""
+AUTH_LDAP_BIND_DN = ""
+AUTH_LDAP_BIND_PASSWORD = ""
 AUTH_LDAP_ROOT_BIND_DN =
 AUTH_LDAP_ROOT_BIND_PASSWORD =
 
@@ -98,10 +98,10 @@ QUOTA_SOFT_LIMIT_FIELD = 4
 QUOTA_HARD_LIMIT_FIELD = 5
 
 # smtp config
-SMTP_HOST = 'smtp.gmail.com'
-SMTP_USER = 'smtp.segundo.asir@gmail.com'
-SMTP_PASS = 'pass.segundo.asir'
-SMTP_NAME = 'Robot PGDI'
+SMTP_HOST = ''
+SMTP_USER = ''
+SMTP_PASS = ''
+SMTP_NAME = ''
 
 # Django Suit configuration
 SUIT_CONFIG = {
