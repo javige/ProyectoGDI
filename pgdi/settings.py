@@ -60,7 +60,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
 # PGDI
 # ldap config
 LDAP_VERSION = ldap.VERSION3
-LDAP_SERVER_NAME = "pgdi"
+LDAP_SERVER_NAME = ""
 
 LDAP_DOMAIN_BASE = "dc=pgdi,dc=inf"
 LDAP_USERS_BASE = "ou=usuarios," + LDAP_DOMAIN_BASE
@@ -77,13 +77,13 @@ LOGIN_SHELL = '/bin/bash'
 HOME_DIRECTORY = '/home/pub/'
 
 # Parametros para la conexion SSH con el servidor NFS
-SSH_USER = "comandante"
-SSH_HOST = "pgdi"
-SSH_PORT = "22"
+SSH_USER = ""
+SSH_HOST = ""
+SSH_PORT = ""
 
 # Ruta a las claves para la conexion SSH
-SSH_KEY_REPQUOTA = "/var/www/.ssh/id_rsa_repquota"
-SSH_KEY_DU = "/var/www/.ssh/id_rsa_du"
+SSH_KEY_REPQUOTA = ""
+SSH_KEY_DU = ""
 
 # Numero de directorios de gran peso a mostrar
 MAX_SIZE_FILE_LIMIT = 10
